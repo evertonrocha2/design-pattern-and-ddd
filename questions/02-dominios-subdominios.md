@@ -1,0 +1,11 @@
+# 2. Domínios e Subdomínios
+
+O domínio principal da empresa é a logística de entrega de produtos. Dentro dele, conseguimos identificar quatro áreas que se comportam de jeitos bem diferentes do ponto de vista estratégico, e cada uma merece tratamento próprio.
+
+A Gestão de Fretes é o subdomínio core. É ali que a operadora se diferencia no mercado. Saber calcular uma rota eficiente, escolher o modal certo entre motoboy, caminhão, trem ou navio, e fechar uma cotação competitiva é o que faz o cliente escolher essa empresa em vez da concorrência. Toda a inteligência de negócio que justifica a existência da operadora vive neste subdomínio. Por isso merece o time mais experiente, o modelo mais bem cuidado e o maior investimento em código próprio. Comprar uma solução pronta para isso seria desistir do que a empresa tem de melhor.
+
+O Rastreamento é um subdomínio de apoio. O cliente final espera saber onde a carga está, e isso virou praticamente obrigação no mercado logístico. Importante para a operação, mas não é o que faz a empresa vencer a concorrência. As soluções de geolocalização e a modelagem de eventos de status seguem padrões parecidos no setor inteiro. Vale ter um modelo próprio porque ele se conecta de perto com o pedido de frete, mas não precisa de reinvenção nem de pesquisa avançada. Construir bem, sem exageros, resolve.
+
+Manutenção de Frota também é de apoio. Sem veículo rodando, nenhum frete acontece, então o controle preventivo é essencial para manter a operação saudável. Mas o cliente que contrata o frete não escolhe a operadora pela qualidade da oficina. É um trabalho importante de bastidor, que pode ter modelo próprio adaptado à realidade da empresa sem precisar competir com produtos prontos do mercado.
+
+Já o Faturamento é um subdomínio genérico. Emissão de CT-e, geração de nota fiscal eletrônica, conciliação bancária. Tudo isso tem formato definido pela Receita e pelos bancos, segue regulação rígida e tem dezenas de produtos prontos no mercado que resolvem bem. Construir do zero aqui é gastar energia em algo que não devolve diferencial nenhum para o negócio. A escolha natural é integrar com uma solução de mercado e manter dentro do sistema apenas o que for específico da operadora, como regras de margem, condições comerciais e política de descontos.
