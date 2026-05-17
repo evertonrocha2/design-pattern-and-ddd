@@ -2,13 +2,13 @@
 
 Modelagem em Domain Driven Design para o sistema de uma operadora logística que cobre gestão de fretes, rastreamento, faturamento e manutenção de frota. Projeto Java com build via Maven.
 
-## Documentação do modelo estratégico
+## Respostas das questões do exercício
 
-1. [Gestão da Complexidade](docs/01-gestao-complexidade.md)
-2. [Domínios e Subdomínios](docs/02-dominios-subdominios.md)
-3. [Bounded Contexts](docs/03-bounded-contexts.md)
-4. [Linguagem Ubíqua](docs/04-linguagem-ubiqua.md)
-5. [Design Estratégico e Shared Kernel](docs/05-design-estrategico.md)
+1. [Gestão da Complexidade](questions/01-gestao-complexidade.md)
+2. [Domínios e Subdomínios](questions/02-dominios-subdominios.md)
+3. [Bounded Contexts](questions/03-bounded-contexts.md)
+4. [Linguagem Ubíqua](questions/04-linguagem-ubiqua.md)
+5. [Design Estratégico e Shared Kernel](questions/05-design-estrategico.md)
 
 ## Estrutura do projeto
 
@@ -17,7 +17,7 @@ O código segue a convenção Maven (`src/main/java`) e dentro de `br/com/logist
 ```
 SystemDesignDDD02/
 ├── pom.xml
-├── docs/
+├── questions/
 └── src/
     └── main/
         └── java/
