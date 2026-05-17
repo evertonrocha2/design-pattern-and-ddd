@@ -1,29 +1,29 @@
 # 5. Design Estratégico e Shared Kernel
 
-Existe um equívoco comum em DDD que é jogar no shared kernel tudo que parece reutilizável. Shared kernel não é pasta de utilitários. É um conjunto pequeno de conceitos cuja mudança afeta todos os contextos ao mesmo tempo e por isso exige acordo entre os times responsáveis. Quanto menor o shared kernel, melhor.
+Tem um erro clássico em DDD que é jogar no shared kernel tudo que parece reutilizável. Shared kernel não é pasta de utilitários. É um conjunto pequeno de conceitos que, se mudarem, afetam todos os contextos ao mesmo tempo e por isso exigem acordo entre os times. Quanto menor, melhor.
 
 ## O que faz sentido compartilhar
 
-Endereço é o caso mais óbvio. Aparece em Gestão de Fretes para indicar origem e destino do pedido, em Rastreamento para registrar onde a carga foi coletada e onde foi entregue, em Faturamento para guardar o endereço de cobrança e o endereço fiscal, e em Manutenção para registrar a oficina onde o veículo está sendo atendido. É um value object simples, com logradouro, número, bairro, cidade, estado e CEP, e validação de formato. Vale ter um só.
+Endereço é o caso óbvio. Aparece em Fretes (origem e destino), em Rastreamento (onde foi coletado e entregue), em Faturamento (cobrança e emissão de CT-e) e em Manutenção (endereço da oficina). Value object simples, com logradouro, número, bairro, cidade, estado e CEP.
 
-Dinheiro também. Está em Fretes na cotação, em Faturamento no valor cobrado, no imposto retido e no valor recebido, e em Manutenção no custo da ordem de serviço. Ter uma representação única que carrega valor e moeda, e que não deixa misturar moedas diferentes por engano em uma operação aritmética, evita uma classe inteira de bug bobo.
+Dinheiro também. Está em Fretes na cotação, em Faturamento no valor cobrado e no imposto retido, e em Manutenção no custo da OS. Ter uma representação única que carrega valor e moeda, e que não deixa misturar moedas diferentes por engano, evita uma classe inteira de bug bobo.
 
-A Placa de veículo é um caso mais delicado, mas vale o esforço. O dono do agregado Veículo é Manutenção, e isso não muda. Mas a placa é referenciada por Fretes quando o sistema registra qual veículo foi alocado ao pedido, e por Rastreamento quando associa uma posição recebida ao veículo correto. Então a Placa vira um value object compartilhado que carrega o número e a validação do formato brasileiro. O resto do veículo, modelo, ano, ficha de manutenção, fica em Manutenção.
+A Placa do veículo é um caso mais delicado. O dono do agregado Veículo é Manutenção, e isso não muda. Mas a placa é referenciada por Fretes ao registrar qual veículo foi alocado, e por Rastreamento pra associar a posição ao veículo. Então a Placa vira value object compartilhado. O resto do veículo continua em Manutenção.
 
-A identidade de pessoa e empresa segue a mesma lógica. CPF e CNPJ aparecem em Fretes como remetente e destinatário, em Faturamento como emitente e tomador, e em Manutenção como fornecedor de peças e serviços. Como os três contextos precisam validar dígito e armazenar o número formatado, vale ter Cpf e Cnpj no shared kernel.
+CPF e CNPJ entram pela mesma lógica. Aparecem em Fretes como remetente e destinatário, em Faturamento como emitente e tomador, e em Manutenção como fornecedor de peças. Todos validam dígito e armazenam o número formatado, então vale ter um value object só.
 
-Por fim, o identificador do pedido de frete. O pedido é criado em Fretes, mas Rastreamento referencia esse identificador para vincular os eventos de posição à carga certa, e Faturamento referencia para amarrar o CT-e ao pedido de origem. O shared kernel guarda apenas o identificador como value object, não o pedido inteiro. Cada contexto monta sua própria visão do pedido a partir desse identificador, e essa é justamente a beleza do bounded context.
+Por fim, o identificador do pedido de frete. O pedido nasce em Fretes, mas Rastreamento amarra os eventos de posição a ele, e Faturamento amarra o CT-e a ele. O shared kernel guarda só o identificador, não o pedido inteiro. Cada contexto monta sua visão do pedido a partir desse ID, e essa é justamente a beleza do bounded context.
 
 ## O que parece compartilhável mas não é
 
-Status da carga é tentador colocar no shared kernel, mas ele pertence a Rastreamento. Se Faturamento precisa saber que uma entrega aconteceu, ele se inscreve no evento EntregaConfirmada e cuida da própria interpretação dali pra frente. Compartilhar o enum de status criaria um acoplamento ruim, onde uma mudança em Rastreamento obrigaria todos os outros contextos a se atualizarem juntos.
+Status da carga é tentador, mas pertence a Rastreamento. Se Faturamento precisa saber que a entrega aconteceu, escuta o evento `EntregaConfirmada` e cuida da própria interpretação. Compartilhar o enum de status acoplaria os contextos.
 
-Cliente também é um caso que parece óbvio mas não é. Em Fretes, Cliente é quem contrata o serviço e tem condições comerciais negociadas. Em Faturamento, Cliente é quem paga, com histórico de inadimplência e situação fiscal. São duas visões diferentes de uma mesma pessoa do mundo real. O que pode ser compartilhado é só o CNPJ que identifica essa pessoa, e isso já está coberto pelo value object Cnpj.
+Cliente também não vai. Em Fretes, Cliente é quem contrata e tem condição comercial. Em Faturamento, Cliente é quem paga e tem situação fiscal. São duas visões diferentes da mesma pessoa do mundo real. O que dá pra compartilhar é só o CNPJ, que já está coberto.
 
-## Como os contextos se relacionam de fato
+## Como os contextos se conectam
 
-A relação principal é em cadeia. Fretes publica PedidoCriado e VeiculoAlocado. Rastreamento consome esses dois eventos para iniciar e configurar o monitoramento da carga. Quando a entrega acontece, Rastreamento publica EntregaConfirmada, e Faturamento consome esse evento para emitir o CT-e e abrir a fatura. Nessa cadeia, Fretes está sempre upstream em relação a Rastreamento, e Rastreamento está upstream em relação a Faturamento. As duas relações são clássicas de Customer/Supplier no vocabulário de DDD: quem está embaixo na cadeia depende de quem está em cima, e precisa se adaptar quando os eventos mudam.
+A relação principal é em cadeia. Fretes publica `PedidoCriado` e `VeiculoAlocado`. Rastreamento consome os dois pra iniciar e configurar o monitoramento. Quando a entrega acontece, Rastreamento publica `EntregaConfirmada`, e Faturamento usa esse evento pra emitir o CT-e. Nessa cadeia, Fretes está upstream de Rastreamento, e Rastreamento está upstream de Faturamento. Quem está embaixo se adapta a quem está em cima.
 
-Em paralelo, Manutenção mantém uma relação direta com Fretes. Quando um veículo precisa entrar em revisão, Manutenção publica VeiculoIndisponivel, e Fretes para de oferecer aquele veículo na alocação. Quando o serviço termina, Manutenção publica VeiculoDisponivel, e o veículo volta para a frota disponível. Manutenção também escuta o VeiculoAlocado de Fretes, mas só para projetar quilometragem futura e antecipar a próxima revisão preventiva. É um relacionamento de mão dupla, mas mediado totalmente por eventos, sem chamada síncrona de um lado para o outro.
+Em paralelo, Manutenção conversa direto com Fretes. Quando um veículo entra em revisão, publica `VeiculoIndisponivel` pra Fretes parar de oferecer aquela placa. Quando volta, publica `VeiculoDisponivel`. Manutenção também escuta `VeiculoAlocado`, mas só pra projetar quilometragem futura.
 
-Cada contrato de evento é versionado e documentado, porque é nele que a operação se sustenta no dia a dia. Quando alguém precisa adicionar um campo novo em um evento existente, isso precisa ser combinado com os consumidores, porque é exatamente aí que mudanças quebram silenciosamente sistemas em produção.
+Os contratos de evento são versionados. Adicionar campo novo em evento existente precisa combinar com os consumidores, porque é exatamente aí que mudanças quebram silenciosamente em produção.
